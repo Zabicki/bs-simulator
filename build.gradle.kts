@@ -27,9 +27,9 @@ dependencies {
     //implementation("org.springframework.data:spring-data-redis:3.0.4")
     //implementation("org.springframework.data:spring-data-elasticsearch:5.0.4")
     //implementation("org.springframework.data:spring-data-neo4j:7.0.4")
+    implementation("org.postgresql:postgresql:42.6.0")
 
     implementation("org.liquibase:liquibase-core:4.20.0")
-    implementation("org.postgresql:postgresql:42.6.0")
 }
 
 tasks.getByName<Test>("test") {
