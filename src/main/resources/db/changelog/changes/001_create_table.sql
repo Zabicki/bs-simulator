@@ -30,5 +30,6 @@ CREATE TABLE "event" (
     billingCycleDefId varchar(255),
     billingCycleInstanceId varchar(255),
     unit varchar(255),
+    billingProviderId varchar(255),
     PRIMARY KEY (id)
 );

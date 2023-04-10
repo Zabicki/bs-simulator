@@ -44,4 +44,5 @@ public class Event {
     private String billingCycleDefId;
     private String billingCycleInstanceId;
     private String unit;
+    private String billingProviderId;
 }
