@@ -2,17 +2,12 @@ package pl.zabicki.generator;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
-import org.apache.commons.lang3.RandomStringUtils;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.StringWriter;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Instant;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class EventGenerator {
@@ -21,9 +16,9 @@ public class EventGenerator {
 
     public static void main(String[] args) throws IOException {
         new EventGenerator().generate(List.of(
-                new Request(100_000, 1, 500),
-                new Request(10_000, 3, 500),
-                new Request(100, 1000, 10_000)
+                new Request(10, 1, 500),
+                new Request(10, 3, 500),
+                new Request(1, 10, 10_000)
                 ));
     }
 
@@ -37,40 +32,9 @@ public class EventGenerator {
      *                 for 1 billing cycle
      */
     public void generate(List<Request> requests) throws IOException {
-        BufferedWriter writer = Files.newBufferedWriter(Paths.get("test.csv"));
-        CSVFormat format = CSVFormat.DEFAULT.builder()
-                .setHeader("clientId",
-                        "accountId",
-                        "apInstanceId",
-                        "callingNumber",
-                        "calledNumber",
-                        "callingPrefix",
-                        "calledPrefix",
-                        "eventBeginDate",
-                        "eventEndDate",
-                        "productId",
-                        "rootProductId",
-                        "intProperty1",
-                        "intProperty2",
-                        "intProperty3",
-                        "intProperty4",
-                        "intProperty5",
-                        "stringProperty1",
-                        "stringProperty2",
-                        "stringProperty3",
-                        "stringProperty4",
-                        "stringProperty5",
-                        "booleanProperty1",
-                        "booleanProperty2",
-                        "booleanProperty3",
-                        "booleanProperty4",
-                        "booleanProperty5",
-                        "quantity",
-                        "billingCycleDefId",
-                        "billingCycleInstanceId",
-                        "unit",
-                        "billingProviderId")
-                .build();
+        BufferedWriter writer = Files.newBufferedWriter(Paths.get("data/test.csv"));
+        CSVFormat format = createFormat();
+        Map<String, List<String>> clientIdToAccountIds = new HashMap<>();
 
         try (final CSVPrinter printer = new CSVPrinter(writer, format)) {
             String billCycleDefId = UUID.randomUUID().toString();
@@ -81,6 +45,16 @@ public class EventGenerator {
                     String clientId = UUID.randomUUID().toString();
                     for (int j = 0; j < request.numOfAccounts(); j++) {
                         String accountId = UUID.randomUUID().toString();
+                        if (clientIdToAccountIds.containsKey(clientId)) {
+                            List<String> accountIds = clientIdToAccountIds.get(clientId);
+                            accountIds.add(accountId);
+                            clientIdToAccountIds.put(clientId, accountIds);
+                        } else {
+                            List<String> accountIds = new LinkedList<>();
+                            accountIds.add(accountId);
+                            clientIdToAccountIds.put(clientId, accountIds);
+                        }
+
                         for (int k = 0; k < request.numOfEventsPerAccount(); k++) {
                             String apInstanceId = UUID.randomUUID().toString();
                             String productId = UUID.randomUUID().toString();
@@ -119,43 +93,29 @@ public class EventGenerator {
                                     .quantity(Long.parseLong(randomNumber(1, 1000)))
                                     .build();
 
-                            printer.printRecord(event.getClientId(),
-                                    event.getAccountId(),
-                                    event.getApInstanceId(),
-                                    event.getCallingNumber(),
-                                    event.getCalledNumber(),
-                                    event.getCallingPrefix(),
-                                    event.getCalledPrefix(),
-                                    event.getEventBeginDate(),
-                                    event.getEventEndDate(),
-                                    event.getProductId(),
-                                    event.getRootProductId(),
-                                    event.getIntProperty1(),
-                                    event.getIntProperty2(),
-                                    event.getIntProperty3(),
-                                    event.getIntProperty4(),
-                                    event.getIntProperty5(),
-                                    event.getStringProperty1(),
-                                    event.getStringProperty2(),
-                                    event.getStringProperty3(),
-                                    event.getStringProperty4(),
-                                    event.getStringProperty5(),
-                                    event.isBooleanProperty1(),
-                                    event.isBooleanProperty2(),
-                                    event.isBooleanProperty3(),
-                                    event.isBooleanProperty4(),
-                                    event.isBooleanProperty5(),
-                                    event.getQuantity(),
-                                    event.getBillingCycleDefId(),
-                                    event.getBillingCycleInstanceId(),
-                                    event.getUnit(),
-                                    event.getBillingProviderId());
+                            printRecord(printer, event);
                         }
                     }
                 }
             }
         }
 
+        File file = new File("data/accounts.csv");
+        file.delete();
+        file.createNewFile();
+        try (FileWriter fw = new FileWriter("data/accounts.csv")) {
+            for (Map.Entry<String, List<String>> entry : clientIdToAccountIds.entrySet()) {
+                StringBuilder builder = new StringBuilder();
+                builder.append(entry.getKey()).append(","); //clientId,
+                for (String accountId : entry.getValue()) {
+                    builder.append(accountId).append(",");
+                }
+                builder.deleteCharAt(builder.length() - 1);
+
+                fw.write(builder.toString());
+                fw.write("\n");
+            }
+        }
     }
 
     private String randomNumber(int min, int max) {
@@ -183,5 +143,75 @@ public class EventGenerator {
                 .limit(length)
                 .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
                 .toString();
+    }
+
+    private CSVFormat createFormat() {
+        return CSVFormat.DEFAULT.builder()
+                .setHeader("clientId",
+                        "accountId",
+                        "apInstanceId",
+                        "callingNumber",
+                        "calledNumber",
+                        "callingPrefix",
+                        "calledPrefix",
+                        "eventBeginDate",
+                        "eventEndDate",
+                        "productId",
+                        "rootProductId",
+                        "intProperty1",
+                        "intProperty2",
+                        "intProperty3",
+                        "intProperty4",
+                        "intProperty5",
+                        "stringProperty1",
+                        "stringProperty2",
+                        "stringProperty3",
+                        "stringProperty4",
+                        "stringProperty5",
+                        "booleanProperty1",
+                        "booleanProperty2",
+                        "booleanProperty3",
+                        "booleanProperty4",
+                        "booleanProperty5",
+                        "quantity",
+                        "billingCycleDefId",
+                        "billingCycleInstanceId",
+                        "unit",
+                        "billingProviderId")
+                .build();
+    }
+
+    private void printRecord(CSVPrinter printer, Event event) throws IOException {
+        printer.printRecord(event.getClientId(),
+                event.getAccountId(),
+                event.getApInstanceId(),
+                event.getCallingNumber(),
+                event.getCalledNumber(),
+                event.getCallingPrefix(),
+                event.getCalledPrefix(),
+                event.getEventBeginDate(),
+                event.getEventEndDate(),
+                event.getProductId(),
+                event.getRootProductId(),
+                event.getIntProperty1(),
+                event.getIntProperty2(),
+                event.getIntProperty3(),
+                event.getIntProperty4(),
+                event.getIntProperty5(),
+                event.getStringProperty1(),
+                event.getStringProperty2(),
+                event.getStringProperty3(),
+                event.getStringProperty4(),
+                event.getStringProperty5(),
+                event.isBooleanProperty1(),
+                event.isBooleanProperty2(),
+                event.isBooleanProperty3(),
+                event.isBooleanProperty4(),
+                event.isBooleanProperty5(),
+                event.getQuantity(),
+                event.getBillingCycleDefId(),
+                event.getBillingCycleInstanceId(),
+                event.getUnit(),
+                event.getBillingProviderId());
     }
 }
