@@ -2,6 +2,7 @@ package pl.zabicki.generator;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import pl.zabicki.billing.data.model.CsvEvent;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -59,7 +60,7 @@ public class EventGenerator {
                             String apInstanceId = UUID.randomUUID().toString();
                             String productId = UUID.randomUUID().toString();
                             String rootProductId = UUID.randomUUID().toString();
-                            Event event = Event.builder()
+                            CsvEvent event = CsvEvent.builder()
                                     .clientId(clientId)
                                     .accountId(accountId)
                                     .apInstanceId(apInstanceId)
@@ -104,16 +105,14 @@ public class EventGenerator {
         file.delete();
         file.createNewFile();
         try (FileWriter fw = new FileWriter("data/accounts.csv")) {
+            fw.write("clientId,accountId");
+            fw.write("\n");
             for (Map.Entry<String, List<String>> entry : clientIdToAccountIds.entrySet()) {
                 StringBuilder builder = new StringBuilder();
-                builder.append(entry.getKey()).append(","); //clientId,
                 for (String accountId : entry.getValue()) {
-                    builder.append(accountId).append(",");
+                    builder.append(entry.getKey()).append(",").append(accountId).append("\n");
                 }
-                builder.deleteCharAt(builder.length() - 1);
-
                 fw.write(builder.toString());
-                fw.write("\n");
             }
         }
     }
@@ -181,7 +180,7 @@ public class EventGenerator {
                 .build();
     }
 
-    private void printRecord(CSVPrinter printer, Event event) throws IOException {
+    private void printRecord(CSVPrinter printer, CsvEvent event) throws IOException {
         printer.printRecord(event.getClientId(),
                 event.getAccountId(),
                 event.getApInstanceId(),

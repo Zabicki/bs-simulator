@@ -12,6 +12,7 @@ repositories {
 
 dependencies {
     implementation("org.projectlombok:lombok:1.18.22")
+    annotationProcessor("org.projectlombok:lombok:1.18.22")
     implementation("jakarta.validation:jakarta.validation-api:3.0.2")
     implementation("org.hibernate.validator:hibernate-validator:8.0.0.Final")
 
@@ -30,6 +31,11 @@ dependencies {
     implementation("org.postgresql:postgresql:42.6.0")
 
     implementation("org.liquibase:liquibase-core:4.20.0")
+
+    implementation("org.apache.commons:commons-lang3:3.12.0")
+    implementation("org.apache.commons:commons-csv:1.10.0")
+
+    implementation(project(":core"))
 }
 
 tasks.getByName<Test>("test") {

@@ -1,11 +1,11 @@
-package pl.zabicki.generator;
+package pl.zabicki.billing.data.model;
 
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder
-public class Event {
+public class CsvEvent {
     private long id;
     private String clientId;
     private String accountId;
@@ -43,34 +43,34 @@ public class Event {
     public String toString() {
         return clientId + "," +
                 accountId + "," +
-        apInstanceId + "," +
+                apInstanceId + "," +
                 callingNumber + "," +
-        calledNumber + "," +
+                calledNumber + "," +
                 callingPrefix + "," +
-        calledPrefix + "," +
+                calledPrefix + "," +
                 eventBeginDate + "," +
-        eventEndDate + "," +
+                eventEndDate + "," +
                 productId + "," +
-        rootProductId + "," +
+                rootProductId + "," +
                 intProperty1 + "," +
-        intProperty2 + "," +
+                intProperty2 + "," +
                 intProperty3 + "," +
-        intProperty4 + "," +
+                intProperty4 + "," +
                 intProperty5 + "," +
-        stringProperty1 + "," +
+                stringProperty1 + "," +
                 stringProperty2 + "," +
-        stringProperty3 + "," +
+                stringProperty3 + "," +
                 stringProperty4 + "," +
-        stringProperty5 + "," +
+                stringProperty5 + "," +
                 booleanProperty1 + "," +
-        booleanProperty2 + "," +
+                booleanProperty2 + "," +
                 booleanProperty3 + "," +
-        booleanProperty4 + "," +
+                booleanProperty4 + "," +
                 booleanProperty5 + "," +
-        quantity + "," +
+                quantity + "," +
                 billingCycleDefId + "," +
-        billingCycleInstanceId + "," +
+                billingCycleInstanceId + "," +
                 unit + "," +
-        billingProviderId;
+                billingProviderId;
     }
 }

@@ -4,3 +4,4 @@
 build/*
 datagenerator/build/*
 data/*
+core/build/*
